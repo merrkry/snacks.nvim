@@ -393,7 +393,10 @@ end
 ---@param prev? number
 local function step(scope, value, prev)
   prev = prev or 0
-  local cursor = vim.api.nvim_win_get_cursor(scope.win)
+  local ok, cursor = pcall(vim.api.nvim_win_get_cursor, scope.win)
+  if not ok then
+    return
+  end
   local dt = math.abs(scope.from - cursor[1])
   local db = math.abs(scope.to - cursor[1])
   local style = config.animate.style == "up_down" and (dt < db and "down" or "up") or config.animate.style
@@ -421,7 +424,7 @@ end
 ---@private
 function M.on_scope(win, buf, scope, prev)
   stats.scope = stats.scope + 1
-  if scope then
+  if scope and vim.api.nvim_win_is_valid(win) then
     scope.win = win
     local animate = Snacks.animate.enabled({ buf = buf, name = "indent" })
 
